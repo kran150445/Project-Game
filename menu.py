@@ -75,12 +75,13 @@ def menu_loop():
         selection_color=COLOR_WHITE,
         widget_font=pygame_menu.font.FONT_BEBAS,
         title_font_size=TILE_SIZE,
-        title_font_color=COLOR_BLACK,
+        title_font_color=COLOR_WHITE,  # Change to white
         title_font=pygame_menu.font.FONT_BEBAS,
         widget_font_color=COLOR_BLACK,
         widget_font_size=int(TILE_SIZE*0.7),
         background_color=(0, 0, 0, 0),  # Transparent background
         title_background_color=(0, 0, 0, 0),  # Transparent title bar
+        title_offset=(0, 20),  # Slide title down by 20 pixels
     )
 
     play_menu = pygame_menu.Menu(
@@ -119,7 +120,7 @@ def menu_loop():
         title_font_size=TILE_SIZE,
         title_font_color=COLOR_BLACK,
         title_font=pygame_menu.font.FONT_BEBAS,
-        widget_font_color=COLOR_BLACK,
+        widget_font_color=COLOR_WHITE,  # Change data text color to white
         widget_font_size=int(TILE_SIZE*0.5),
         background_color=(0, 0, 0, 0),  # Transparent background
         title_background_color=MENU_TITLE_COLOR
@@ -132,12 +133,7 @@ def menu_loop():
         overflow=False,
         title='About'
     )
-    about_menu.add.label("Player controls: ")
-    about_menu.add.label("Movement: Arrows")
-    about_menu.add.label("Plant bomb: Space")
-    about_menu.add.label("Author: Michal Sliwa")
-    about_menu.add.label("Sprite: ")
-    about_menu.add.label("https://opengameart.org/ content/bomb-party-the-complete-set", wordwrap=True)
+    about_menu.add.label("This game is a game that can be played by 1-4 people where the player's objective is to place bombs to destroy all opponents. Have fun playing the game.", wordwrap=True)
     about_menu.add.vertical_margin(25)
     about_menu.add.button('Return  to  main  menu', pygame_menu.events.BACK)
 
