@@ -80,7 +80,7 @@ def menu_loop():
         widget_font_color=COLOR_BLACK,
         widget_font_size=int(TILE_SIZE*0.7),
         background_color=(0, 0, 0, 0),  # Transparent background
-        title_background_color=MENU_TITLE_COLOR,
+        title_background_color=(0, 0, 0, 0),  # Transparent title bar
     )
 
     play_menu = pygame_menu.Menu(
@@ -146,7 +146,7 @@ def menu_loop():
         height=int(WINDOW_SIZE[1] * WINDOW_SCALE),
         width=int(WINDOW_SIZE[0] * WINDOW_SCALE),
         onclose=pygame_menu.events.EXIT,
-        title='Main menu'
+        title=''  # Remove the MAIN MENU bar
     )
 
     main_menu.add.button('Play', play_menu)
