@@ -79,9 +79,8 @@ def menu_loop():
         title_font=pygame_menu.font.FONT_BEBAS,
         widget_font_color=COLOR_BLACK,
         widget_font_size=int(TILE_SIZE*0.7),
-        background_color=MENU_BACKGROUND_COLOR,
+        background_color=(0, 0, 0, 0),  # Transparent background
         title_background_color=MENU_TITLE_COLOR,
-
     )
 
     play_menu = pygame_menu.Menu(
@@ -114,7 +113,7 @@ def menu_loop():
     play_menu.add.button('Options', play_options)
     play_menu.add.button('Return  to  main  menu', pygame_menu.events.BACK)
 
-    about_menu_theme = pygame_menu.themes.Theme(
+    about_menu_theme = pygame_menu.Theme(
         selection_color=COLOR_WHITE,
         widget_font=pygame_menu.font.FONT_BEBAS,
         title_font_size=TILE_SIZE,
@@ -122,7 +121,7 @@ def menu_loop():
         title_font=pygame_menu.font.FONT_BEBAS,
         widget_font_color=COLOR_BLACK,
         widget_font_size=int(TILE_SIZE*0.5),
-        background_color=MENU_BACKGROUND_COLOR,
+        background_color=(0, 0, 0, 0),  # Transparent background
         title_background_color=MENU_TITLE_COLOR
     )
 
