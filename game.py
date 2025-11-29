@@ -200,6 +200,12 @@ def generate_map(grid):
 
 def next_stage(surface, show_path, player_alg, en1_alg, en2_alg, en3_alg, scale, stage):
     """Initialize and run the next stage"""
+    global player
+    # Reset player position before starting next stage
+    player.pos_x = 1
+    player.pos_y = 1
+    player.direction = 0
+    player.frame = 0
     game_init(surface, show_path, player_alg, en1_alg, en2_alg, en3_alg, scale, stage + 1)
 
 
