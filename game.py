@@ -179,6 +179,39 @@ def generate_map(grid):
     return
 
 
+def summary_screen(s, tile_size, win, bombs_planted, enemies_total, elapsed_ms):
+    overlay = pygame.Surface(s.get_size(), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 180))
+    title_font = pygame.font.SysFont('Bebas', int(tile_size * 1.5))
+    small_font = pygame.font.SysFont('Bebas', int(tile_size * 0.7))
+    clock = pygame.time.Clock()
+    while True:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                sys.exit(0)
+            elif e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    return
+
+        s.blit(overlay, (0, 0))
+        sx, sy = s.get_size()
+        title = "You Win!" if win else "Game Over"
+        title_surf = title_font.render(title, True, (255, 255, 255))
+        s.blit(title_surf, ((sx - title_surf.get_width()) // 2, sy // 4))
+
+        defeated = enemies_total - sum(1 for en in enemy_list if en.life)
+        lines = [f"Enemies defeated: {defeated}/{enemies_total}", f"Bombs planted: {bombs_planted}", f"Time: {elapsed_ms // 1000}s"]
+        for i, line in enumerate(lines):
+            surf = small_font.render(line, True, (220, 220, 220))
+            s.blit(surf, ((sx - surf.get_width()) // 2, sy // 4 + 60 + i * (tile_size // 1)))
+
+        hint = font.render("Press ESC to go back to menu", False, (153, 153, 255))
+        s.blit(hint, (10, 10))
+
+        pygame.display.update()
+        clock.tick(15)
+
+
 def main(s, tile_size, show_path, terrain_images, bomb_images, explosion_images, power_ups_images):
 
     grid = [row[:] for row in GRID_BASE]
@@ -189,6 +222,10 @@ def main(s, tile_size, show_path, terrain_images, bomb_images, explosion_images,
 
     running = True
     game_ended = False
+    summary_shown = False
+    start_ticks = pygame.time.get_ticks()
+    bombs_planted = 0
+    enemies_total = len(enemy_list)
     while running:
         dt = clock.tick(15)
         for en in enemy_list:
@@ -227,6 +264,11 @@ def main(s, tile_size, show_path, terrain_images, bomb_images, explosion_images,
 
         if not game_ended:
             game_ended = check_end_game()
+            if game_ended and not summary_shown:
+                elapsed_ms = pygame.time.get_ticks() - start_ticks
+                summary_screen(s, tile_size, player.life, bombs_planted, enemies_total, elapsed_ms)
+                summary_shown = True
+                running = False
 
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -239,6 +281,7 @@ def main(s, tile_size, show_path, terrain_images, bomb_images, explosion_images,
                     bombs.append(temp_bomb)
                     grid[temp_bomb.pos_x][temp_bomb.pos_y] = 3
                     player.bomb_limit -= 1
+                    bombs_planted += 1
                 elif e.key == pygame.K_ESCAPE:
                     running = False
 
