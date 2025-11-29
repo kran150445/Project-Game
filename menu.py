@@ -24,6 +24,7 @@ en1_alg = Algorithm.DIJKSTRA
 en2_alg = Algorithm.DFS
 en3_alg = Algorithm.DIJKSTRA
 show_path = True
+current_stage = 1
 surface = pygame.display.set_mode(WINDOW_SIZE)
 
 BACKGROUND_IMAGE = pygame.image.load("assets/menu_bg.png")  # Use your image path
@@ -33,6 +34,12 @@ BACKGROUND_IMAGE = pygame.transform.scale(BACKGROUND_IMAGE, WINDOW_SIZE)
 def change_path(value, c):
     global show_path
     show_path = c
+
+
+def reset_game():
+    global current_stage, show_path
+    current_stage = 1
+    show_path = True
 
 
 def change_player(value, c):
@@ -56,7 +63,7 @@ def change_enemy3(value, c):
 
 
 def run_game():
-    game.game_init(surface, show_path, player_alg, en1_alg, en2_alg, en3_alg, TILE_SIZE)
+    game.game_init(surface, show_path, player_alg, en1_alg, en2_alg, en3_alg, TILE_SIZE, current_stage)
 
 
 def main_background():
