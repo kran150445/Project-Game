@@ -20,6 +20,12 @@ bombs = []
 explosions = []
 power_ups = []
 
+current_stage = 1
+stages_completed = 0
+total_bombs_planted = 0
+total_enemies_defeated = 0
+total_time_elapsed = 0
+
 GRID_BASE = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
              [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
              [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
@@ -35,7 +41,7 @@ GRID_BASE = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
              [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
 
-def game_init(surface, path, player_alg, en1_alg, en2_alg, en3_alg, scale):
+def game_init(surface, path, player_alg, en1_alg, en2_alg, en3_alg, scale, stage=1):
 
     global font
     font = pygame.font.SysFont('Bebas', scale)
@@ -43,6 +49,10 @@ def game_init(surface, path, player_alg, en1_alg, en2_alg, en3_alg, scale):
     global enemy_list
     global ene_blocks
     global player
+    global current_stage
+    global stages_completed
+    
+    current_stage = stage
 
     enemy_list = []
     ene_blocks = []
@@ -124,7 +134,7 @@ def game_init(surface, path, player_alg, en1_alg, en2_alg, en3_alg, scale):
 
     power_ups_images = [power_up_bomb_img, power_up_fire_img]
 
-    main(surface, scale, path, terrain_images, bomb_images, explosion_images, power_ups_images)
+    main(surface, scale, path, terrain_images, bomb_images, explosion_images, power_ups_images, player_alg, en1_alg, en2_alg, en3_alg, scale)
 
 
 def draw(s, grid, tile_size, show_path, game_ended, terrain_images, bomb_images, explosion_images, power_ups_images):
@@ -158,6 +168,15 @@ def draw(s, grid, tile_size, show_path, game_ended, terrain_images, bomb_images,
                     for sek in en.path:
                         pygame.draw.rect(s, (255, 0, 255, 240),
                                          [sek[0] * tile_size, sek[1] * tile_size, tile_size, tile_size], 1)
+    
+    # Display stage level in top-right corner
+    level_font = pygame.font.SysFont('Bebas', int(tile_size * 0.8))
+    level_text = level_font.render(f"STAGE {current_stage}", False, (255, 255, 255))
+    level_bg = pygame.Surface((level_text.get_width() + 20, level_text.get_height() + 10))
+    level_bg.fill((0, 0, 0))
+    level_bg.set_alpha(180)
+    s.blit(level_bg, (s.get_width() - level_text.get_width() - 30, 10))
+    s.blit(level_text, (s.get_width() - level_text.get_width() - 20, 15))
 
     if game_ended:
         tf = font.render("Press ESC to go back to menu", False, (153, 153, 255))
@@ -179,10 +198,91 @@ def generate_map(grid):
     return
 
 
-def summary_screen(s, tile_size, win, bombs_planted, enemies_total, elapsed_ms):
+def next_stage(surface, show_path, player_alg, en1_alg, en2_alg, en3_alg, scale, stage):
+    """Initialize and run the next stage"""
+    game_init(surface, show_path, player_alg, en1_alg, en2_alg, en3_alg, scale, stage + 1)
+
+
+def show_stage_message(s, tile_size, stage):
+    """Display stage transition message"""
+    overlay = pygame.Surface(s.get_size(), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 200))
+    
+    title_font = pygame.font.SysFont('Bebas', int(tile_size * 2))
+    subtitle_font = pygame.font.SysFont('Bebas', int(tile_size * 0.8))
+    
+    clock = pygame.time.Clock()
+    display_time = 2000  # Display for 2 seconds
+    start_time = pygame.time.get_ticks()
+    
+    while pygame.time.get_ticks() - start_time < display_time:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                sys.exit(0)
+        
+        s.blit(overlay, (0, 0))
+        sx, sy = s.get_size()
+        
+        title_surf = title_font.render(f"STAGE {stage}", True, (255, 215, 0))
+        s.blit(title_surf, ((sx - title_surf.get_width()) // 2, sy // 2 - 50))
+        
+        subtitle_surf = subtitle_font.render("Get Ready!", True, (255, 255, 255))
+        s.blit(subtitle_surf, ((sx - subtitle_surf.get_width()) // 2, sy // 2 + 50))
+        
+        pygame.display.update()
+        clock.tick(30)
+
+
+def show_stage_summary(s, tile_size, bombs_planted, enemies_total, elapsed_ms, stage):
+    """Display stage completion summary before moving to next stage"""
     overlay = pygame.Surface(s.get_size(), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 180))
     title_font = pygame.font.SysFont('Bebas', int(tile_size * 1.5))
+    subtitle_font = pygame.font.SysFont('Bebas', int(tile_size * 0.8))
+    small_font = pygame.font.SysFont('Bebas', int(tile_size * 0.7))
+    clock = pygame.time.Clock()
+    
+    display_time = 3000  # Display for 3 seconds
+    start_time = pygame.time.get_ticks()
+    
+    while pygame.time.get_ticks() - start_time < display_time:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                sys.exit(0)
+        
+        s.blit(overlay, (0, 0))
+        sx, sy = s.get_size()
+        title_surf = title_font.render("Stage Complete!", True, (0, 255, 0))
+        s.blit(title_surf, ((sx - title_surf.get_width()) // 2, sy // 4))
+        
+        # Stage information
+        stage_surf = subtitle_font.render(f"Stage {stage} Summary", True, (255, 215, 0))
+        s.blit(stage_surf, ((sx - stage_surf.get_width()) // 2, sy // 4 + 50))
+
+        stage_time = elapsed_ms // 1000
+        
+        lines = [
+            f"Enemies defeated: {enemies_total}/{enemies_total}",
+            f"Bombs planted: {bombs_planted}",
+            f"Time: {stage_time}s"
+        ]
+        
+        for i, line in enumerate(lines):
+            surf = small_font.render(line, True, (220, 220, 220))
+            s.blit(surf, ((sx - surf.get_width()) // 2, sy // 4 + 110 + i * (tile_size * 0.8)))
+        
+        next_stage_text = small_font.render("Next Stage...", True, (255, 255, 100))
+        s.blit(next_stage_text, ((sx - next_stage_text.get_width()) // 2, sy // 2 + 100))
+
+        pygame.display.update()
+        clock.tick(15)
+
+
+def summary_screen(s, tile_size, win, bombs_planted, enemies_total, elapsed_ms, stage):
+    overlay = pygame.Surface(s.get_size(), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 180))
+    title_font = pygame.font.SysFont('Bebas', int(tile_size * 1.5))
+    subtitle_font = pygame.font.SysFont('Bebas', int(tile_size * 0.8))
     small_font = pygame.font.SysFont('Bebas', int(tile_size * 0.7))
     clock = pygame.time.Clock()
     while True:
@@ -195,15 +295,32 @@ def summary_screen(s, tile_size, win, bombs_planted, enemies_total, elapsed_ms):
 
         s.blit(overlay, (0, 0))
         sx, sy = s.get_size()
-        title = "You Win!" if win else "Game Over"
-        title_surf = title_font.render(title, True, (255, 255, 255))
+        title = "Game Over"
+        title_surf = title_font.render(title, True, (255, 100, 100))
         s.blit(title_surf, ((sx - title_surf.get_width()) // 2, sy // 4))
+        
+        # Stage information
+        stage_surf = subtitle_font.render(f"Stage {stage} - Defeated", True, (255, 215, 0))
+        s.blit(stage_surf, ((sx - stage_surf.get_width()) // 2, sy // 4 + 50))
 
         defeated = enemies_total - sum(1 for en in enemy_list if en.life)
-        lines = [f"Enemies defeated: {defeated}/{enemies_total}", f"Bombs planted: {bombs_planted}", f"Time: {elapsed_ms // 1000}s"]
+        stage_bombs = bombs_planted
+        stage_time = elapsed_ms // 1000
+        
+        lines = [
+            f"Enemies defeated: {defeated}/{enemies_total}",
+            f"Bombs planted: {stage_bombs}",
+            f"Time: {stage_time}s",
+            "",
+            f"Total Stages Reached: {stage}",
+            f"Total Bombs: {total_bombs_planted + stage_bombs}",
+            f"Total Enemies: {total_enemies_defeated + defeated}"
+        ]
+        
         for i, line in enumerate(lines):
-            surf = small_font.render(line, True, (220, 220, 220))
-            s.blit(surf, ((sx - surf.get_width()) // 2, sy // 4 + 60 + i * (tile_size // 1)))
+            if line:  # Skip empty lines
+                surf = small_font.render(line, True, (220, 220, 220))
+                s.blit(surf, ((sx - surf.get_width()) // 2, sy // 4 + 110 + i * (tile_size * 0.8)))
 
         hint = font.render("Press ESC to go back to menu", False, (153, 153, 255))
         s.blit(hint, (10, 10))
@@ -212,13 +329,17 @@ def summary_screen(s, tile_size, win, bombs_planted, enemies_total, elapsed_ms):
         clock.tick(15)
 
 
-def main(s, tile_size, show_path, terrain_images, bomb_images, explosion_images, power_ups_images):
-
+def main(s, tile_size, show_path, terrain_images, bomb_images, explosion_images, power_ups_images, player_alg, en1_alg, en2_alg, en3_alg, scale):
+    global total_bombs_planted, total_enemies_defeated, total_time_elapsed
+    
     grid = [row[:] for row in GRID_BASE]
     generate_map(grid)
     # power_ups.append(PowerUp(1, 2, PowerUpType.BOMB))
     # power_ups.append(PowerUp(2, 1, PowerUpType.FIRE))
     clock = pygame.time.Clock()
+    
+    # Show stage transition message
+    show_stage_message(s, tile_size, current_stage)
 
     running = True
     game_ended = False
@@ -263,10 +384,52 @@ def main(s, tile_size, show_path, terrain_images, bomb_images, explosion_images,
         draw(s, grid, tile_size, show_path, game_ended, terrain_images, bomb_images, explosion_images, power_ups_images)
 
         if not game_ended:
-            game_ended = check_end_game()
+            # Check if all enemies are defeated (stage win)
+            all_enemies_defeated = True
+            for en in enemy_list:
+                if en.life:
+                    all_enemies_defeated = False
+                    break
+            
+            # Check if player is dead (game over)
+            if not player.life:
+                game_ended = True
+            
+            # If all enemies defeated but player alive, advance to next stage
+            if all_enemies_defeated and player.life and not summary_shown:
+                elapsed_ms = pygame.time.get_ticks() - start_ticks
+                defeated = enemies_total
+                
+                # Accumulate statistics
+                total_bombs_planted += bombs_planted
+                total_enemies_defeated += defeated
+                total_time_elapsed += elapsed_ms // 1000
+                
+                summary_shown = True
+                
+                # Show stage completion summary
+                show_stage_summary(s, tile_size, bombs_planted, enemies_total, elapsed_ms, current_stage)
+                
+                # Move to next stage
+                explosions.clear()
+                enemy_list.clear()
+                ene_blocks.clear()
+                power_ups.clear()
+                bombs.clear()
+                next_stage(s, show_path, player_alg, en1_alg, en2_alg, en3_alg, scale, current_stage)
+                return
+            
+            # If player dead, show game over summary
             if game_ended and not summary_shown:
                 elapsed_ms = pygame.time.get_ticks() - start_ticks
-                summary_screen(s, tile_size, player.life, bombs_planted, enemies_total, elapsed_ms)
+                defeated = enemies_total - sum(1 for en in enemy_list if en.life)
+                
+                # Accumulate statistics
+                total_bombs_planted += bombs_planted
+                total_enemies_defeated += defeated
+                total_time_elapsed += elapsed_ms // 1000
+                
+                summary_screen(s, tile_size, False, bombs_planted, enemies_total, elapsed_ms, current_stage)
                 summary_shown = True
                 running = False
 
