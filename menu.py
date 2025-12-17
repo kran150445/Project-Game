@@ -27,7 +27,7 @@ show_path = True
 current_stage = 1
 surface = pygame.display.set_mode(WINDOW_SIZE)
 
-BACKGROUND_IMAGE = pygame.image.load("assets/menu_bg.png")  # Use your image path
+BACKGROUND_IMAGE = pygame.image.load("assets/menu_bg2.png")  # Use your image path
 BACKGROUND_IMAGE = pygame.transform.scale(BACKGROUND_IMAGE, WINDOW_SIZE)
 
 
